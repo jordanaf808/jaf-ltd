@@ -7,13 +7,15 @@ export const selectCollections = createSelector(
   shop => shop.collections
 );
 
-// Object.keys: gets all 'keys' from an object in an array
+// Object.keys(): gets all 'keys' from an object in an array
 
 // Get all the keys, then map over all the keys to get the values for each key
 // which will return an array of items we need
+// Check if collections exist
 export const selectCollectionsForPreview = createSelector(
   [selectCollections],
-  collections => Object.keys(collections).map(key => collections[key])
+  collections =>
+    collections ? Object.keys(collections).map(key => collections[key]) : []
 );
 
 // "Curried Function" a function that returns another function.
@@ -24,7 +26,7 @@ export const selectCollectionsForPreview = createSelector(
 export const selectCollection = collectionUrlParam =>
   createSelector(
     [selectCollections],
-    collections => collections[collectionUrlParam]
+    collections => (collections ? collections[collectionUrlParam] : null)
     // collections.find(
     //   collection => collection.id === COLLECTION_ID_MAP[collectionUrlParam]
     // )

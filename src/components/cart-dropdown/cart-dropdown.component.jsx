@@ -9,21 +9,24 @@ import CartItem from '../cart-item/cart-item.component';
 import { selectCartItems } from '../../redux/cart/cart.selectors';
 import { toggleCartHidden } from '../../redux/cart/cart.actions';
 
-import './cart-dropdown.styles.scss';
+import {
+  CartDropdownContainer,
+  CartItemsContainer,
+} from './cart-dropdown.styles';
 
 // if we don't supply a second argument (e.g. mapDispatchToProps) to connect() down below it will
 // automatically pass dispatch into our component as a prop! this way we can dispatch the toggleCartHidden action.
 const CartDropdown = ({ cartItems, history, dispatch }) => (
-  <div className='cart-dropdown'>
-    <div className='cart-items'>
+  <CartDropdownContainer>
+    <CartItemsContainer>
       {cartItems.length ? (
-        cartItems.map((cartItem) => (
+        cartItems.map(cartItem => (
           <CartItem key={cartItem.id} item={cartItem} />
         ))
       ) : (
         <span className='empty-message'>Your Cart Is Empty</span>
       )}
-    </div>
+    </CartItemsContainer>
     <CustomButton
       onClick={() => {
         history.push('/checkout');
@@ -31,7 +34,7 @@ const CartDropdown = ({ cartItems, history, dispatch }) => (
       }}>
       Go To Checkout
     </CustomButton>
-  </div>
+  </CartDropdownContainer>
 );
 
 // mapStateToProps will return our state which we'll destructure out our

@@ -26,16 +26,16 @@ import { selectCurrentUser } from './redux/user/user.selector';
 //   return (
 class App extends React.Component {
   unsubscribeFromAuth = null;
-  // pass in the current user to the unsubscribe method
+  // whenever the auth state changes pass in the current userAuth object
+  // we pass in the userAuth object to createUserPro... in firebase.utils...
+  // if user doesnt exist create one, otherwise return the current userRef
+  // set that userRef to the current User in our redux state.
   componentDidMount() {
     const { setCurrentUser } = this.props;
-    this.unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
       if (userAuth) {
-        // userRef: a 'documentRef object' that can perform CRUD operations on our database.
-        // snapshot: an object we get from the referenceObject, userRef.
-        // 'snapshot' object allows us to check if it .exists and get it's .data() method.
         const userRef = await createUserProfileDocument(userAuth);
-        userRef.onSnapshot((snapShot) => {
+        userRef.onSnapshot(snapShot => {
           setCurrentUser({
             // this.setState({
             //   currentUser: {
@@ -45,6 +45,7 @@ class App extends React.Component {
         });
       }
       // this.setState({currentUser: userAuth});
+
       setCurrentUser(userAuth);
     });
   }
@@ -86,8 +87,8 @@ const mapStateToProps = createStructuredSelector({
 // which goes to a func. which gets the 'user' object. then calls dispatch().
 // dispatch tells redux to pass this action object with the 'user' payload
 // to the reducers.
-const mapDispatchToProps = (dispatch) => ({
-  setCurrentUser: (user) => dispatch(setCurrentUser(user)),
+const mapDispatchToProps = dispatch => ({
+  setCurrentUser: user => dispatch(setCurrentUser(user)),
 });
 
 // our app doesn't need currentUser data, only the header component needs it.
