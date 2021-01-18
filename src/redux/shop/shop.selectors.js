@@ -31,3 +31,15 @@ export const selectCollection = collectionUrlParam =>
     //   collection => collection.id === COLLECTION_ID_MAP[collectionUrlParam]
     // )
   );
+
+// selector for isLoading info from state
+export const selectIsCollectionFetching = createSelector(
+  [selectShop],
+  shop => shop.isFetching
+);
+
+// selector for checking if our collections object has loaded or not, which will then trigger or not trigger the isLoading spinner
+export const selectIsCollectionsLoaded = createSelector(
+  [selectShop],
+  shop => shop.collections
+);
