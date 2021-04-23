@@ -16,6 +16,7 @@ import { fetchCollectionsStart } from '../../redux/shop/shop.actions';
 // get data using .onSnapshot fetching data whenever it mounts or re-renders. it will return snapshot object
 // transform data into shape we need and add values we don't have like route name. do this in a function in firebase.utils
 // pass in the snapshot to our new convert... util and we'll get our data with all the properties we want like routename.
+
 // class ShopPage extends React.Component {
 const ShopPage = ({ fetchCollectionsStart, match }) => {
   // componentDidMount() {

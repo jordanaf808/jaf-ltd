@@ -64,7 +64,7 @@ e.g.
     console.log(iteratorObject.next())
     //{value: "Second value", done: false}
     console.log(iteratorObject.next())
-    // {value: "Third value", done: true}
+    // {value: "Third value", done: false}
     console.log(iteratorObject.next())
     // {value: "undefined, done: true}
 
@@ -92,7 +92,6 @@ declare gen. function:
     console.log('a');
     console.log('b');
     }
-    // undefined
 
 save returned object to a variable
 
@@ -124,7 +123,7 @@ g does not perform the console.logs because it is 'suspended' we must call .next
     const ggObject = gg.next()
     // undefined
     ggObject
-    // {value: 5, done: false} done: false value: 5 __proto__: Object
+    // {value: 5, done: false}
     const gggObject = gg.next()
     // undefined
     gggObject
@@ -170,7 +169,7 @@ We can call any number of sagas inside of this array and execute them on separat
 
 We want to switch our Sign-In/Auth process from an Observer pattern to a more Promise oriented method of asynchronously fetching/updating that data accordingly. Because promises are becoming more prevalent.
 
-We have the Google sign-in method and the plain email/password sign in. So we need 2 seperate sets of Start, Complete, and Failure Action Types.
+We have the Google sign-in method and the plain email/password sign in. So we need 2 separate sets of Start, Complete, and Failure Action Types.
 
 We change our User Reducer to accept new cases for Google and Email signin action types and return the state with the current user and payload and error status (null or error payload)
 
@@ -247,7 +246,7 @@ If you don't want it to fire on every single update, pass in an array as a secon
         console.log('hello')
     }, [searchQuery])
 
-_note_ you can't pass an async function directly in the useEffect, (async returns a thunk(?) object an useEffect requires you to return a regular function. Instead that function can return an async function like so...
+_note_ you can't pass an async function directly in the useEffect, (async returns a thunk(?) object and useEffect requires you to return a regular function. Instead _that_ function can return an async function like so... inside of our useEffect we have an anonymous function that returns the variable fetchFunc which itself is an async (anonymous?) function that awaits a response from a fetch to the api and then awaits the parse of that response. We then attempt to setUser state to the 1st index of the response, _which_ if we _don't_ pass an array in as the 2nd argument to the useEffect, will create an infinite loop and crash. so don't forget to pass in that array (see next example). Most importantly, at the end, trigger the function we just declared above and vòila.
 
     useEffect(() => {
     const fetchFunc = async () => {
@@ -258,7 +257,7 @@ _note_ you can't pass an async function directly in the useEffect, (async return
     fetchFunc();
     },)
 
-One of the reasons we have an array as a second parameter is to prevent infinte loops like this from happening. We only want this useEffect to run when the value of the props in it's array change.
+One of the reasons we have an array as a second parameter is to prevent infinte loops, like our useEffect above, from happening. We only want this useEffect to run when the value of the props in it's array change.
 
 We can mimic a componentDidMount lifecycle by passing in an empty array. This way the effect only fires once.
 
@@ -271,7 +270,7 @@ We can mimic a componentDidMount lifecycle by passing in an empty array. This wa
     fetchFunc();
     }, [])
 
-If we wanted to conditionally call a useEffect, e.g. if(!searchquery), we cannot do it outside of the useEffect(), we must do it inside the function.
+If we wanted to conditionally call a useEffect, e.g. if(!searchquery), we cannot do it outside of the useEffect(), we must do it inside the anonymous function.
 
     useEffect(() => {
         if(searchQuery.length > 0) {
@@ -309,7 +308,7 @@ We can declare this same function above, inside of our useEffect, to call our sn
                 .collection('collections')
                 .onSnapshot(snapshot => console.log(snapshot));
 
-            return () => { // <== "clean up function"
+            return () => {          // <== "clean up function"
                 console.log('unsubscribing');
                 unsubscribeFromCollections();
             };
@@ -323,6 +322,9 @@ In this example above when we go to a collection page, we console.log'd subscrib
 ## Lecture 215
 
 ### Creating your own _Custom Hooks_
+
+We create a separate file to hold all the logic we need to fetch data from an api and pass it into a component without all that mess.
+We declare our custom hook 'useFetch' that takes a 'url' as a callback. then we initiate a useState hook to hold the data that we will fetch. Next, we define a useEffect hook with an anonymous function to async fetch the data from the api, and set the state. We then run that function, (depending on what array we pass in as the 2nd argument) and return the useState hook variable 'data', which contains the data that we fetched, and can now be accessed through this new useFetch custom hook that we can pass in to our app component.
 
 useFetch > use-fetch.effect.js
 
@@ -339,22 +341,32 @@ useFetch > use-fetch.effect.js
             };
             fetchData();
         // different render methods depending on array/!array ...
-        }, ); // update every time the parent component renders or useFetch is called.
-        }, [url]); // only update when 'url' updates.
-        }, []); // only update on mount/initialization
 
-        return data; // <--- DONT FORGET!!!
+            // update every time the parent component renders or    useFetch is called.
+        }, );
+
+            // only update when 'url' updates.
+        }, [url]);
+
+            // only update on mount/initialization
+        }, []);
+
+        return data; // <--- DONT FORGET TO RETURN THE CLEANUP FUNCTION!!!
     };
 
     export default useFetch;
+
+We import our new custom hook into the app and use it in this User component which passes in the url to our useFetch custom hook, which will return the fetch data to be accessed by the variable 'user'.
 
 app.js
 
     import useFetch form '../../effects/use-fetch.effect'
 
     const User = ({ userID }) => {
-        const user = useFetch(`https://jsondata.us/users?id=${userId})
+        const user = useFetch(`https://jsondata.us/users?id=${userId}`)
     }
+    return (
+        <User>...
 
 ## Lecture 217
 
@@ -443,3 +455,102 @@ Build /payment route.
 Write client-side logic to initiate a payment request to stripe with axios. Axios helps us make complex api requests.
 Inside of our stripe-button component the checkout button makes a post request with axios passing in the price and token (passed in by the stripe-checkout component imported from stripe that takes our 'publishable key' and returns the token).
 Express receives that request and passes the respective objects into the body object, that we will pass in to stripe.charges
+
+## Lecture 230
+
+Deploy to Heroku. Make sure remote is set to Heroku. Check you heroku app names `heroku apps`. Check git remotes `git remote`, if not heroku `heroku git:remote -a jaf-ltd`.
+Change _BuildPack_ so that our heroku app now points to our express server backend, which will handle all the routing; Every route except our '/payment' route will be sent to our React app, which will handle any subsequent routing within our client side app. Any request made by our client side app to '/payment' will be handled by express and routed to stripe with the appropriate data and headers.
+
+## Lecture 236
+
+    implement Context API in our cart component
+
+we initiate the cart.context.js with 'hidden' and 'toggleHidden' props and import it into our Header component. To initiate a function you must set it to an empty anon. function so that it doesnt throw any errors.
+We need to incorporate Local State in our Header component so that it can pass it down to it's Child, the cart component, so that it can react to changes to the state.
+We pass in the state through the useState hook and intiate 'hidden' and 'setHidden' to useState(true)
+we make a new function, when called, will activate the setHidden function and set hidden to the opposite boolean !hidden.
+the <CartIcon> component needs access to the toggleHidden function that will update the state of our cart. So we wrap that component (the consumer ) in the Context Provider
+In our CartIcon component we no longer need to pass in the props toggleCartHidden, we now use useContext
+
+## lecture 237
+
+Redux kind of does the same thing as Context, just under the hood. We wrapped our entire App in the Redux <Provider store={store}> which allows any component within the App to be able to access the store. We can make our own 'store' using a Context state.
+
+We make our own Cart provider and put our cart.utils in there, because we are going to utilize the remove and addItemsToCart there, and we are no longer using Redux.
+We are going to move the code we wrote in our cart.context over here in this cart.provider.
+
+We used to be able to set cartItemsCount with Selectors, but not with Context API.
+
+Last time we passed in props that our Cart Icon component needed from the Header to the Cart Component. Were moving some of that logic into our CartProvider component to provide the local state and values our cart icon component needs.
+
+    // cart.provider.jsx
+    const CartContext = createContext({
+    hidden: true,
+    toggleHidden: () => {},
+    cartItems = [],
+    addItem: () => {},
+    removeItem: () => {},
+    clearItemFromCart: () => {},
+    cartItemsCount: 0
+    });
+
+---
+
+      const addItem = (item) => setCartItems(addItemToCart(cartItems, item))
+
+this is the same thing we did before with Redux, only condensed here with ContextAPI. we use the context function addItem, which will take in said item, and run the setCartItems useState hook, which will pass the item to our cart.utils function addItemToCart, which returns us a new array with the new cart items and the quantity of cart items.
+
+We then wrap our whole app in the <CartProvider> component in index.js.
+We can now replace our older CartContext with our new Cart Provider.
+
+CartContext is not a default export anymore it is a regular { export }. so make sure you export const CartContext.
+
+In the Header we used to pull the hidden value off of our CartContext. Now we don't need the Context.Provider in the Header since it's wrapped around our whole app now.
+
+    old way:
+            <CartContext.Provider value={{ hidden, toggleHidden }}>
+          <CartIcon />
+        </CartContext.Provider>
+      </div>
+      {hidden ? null : <CartDropdown />}
+    </div>
+
+we just pass in the hidden value from the useContext hook at the top of this component and voila:
+
+    new way:
+    const { hidden } = useContext(CartContext);
+        ...
+        <CartIcon />
+      </div>
+      {hidden ? null : <CartDropdown />}
+    </div>
+
+Replace values in our Cart Dropdown component. import { useContext } and { CartContext }. make the component an explicit return instead of implicit. We don't need mapStateToProps, Connect, Selectors, reselect, from Redux. We call { CartItems } from useContext(CartContext).
+
+Context State replaces items we got from the Redux state. e.g. mapDispatch
+
+replace our redux addItem with our context addItem
+
+Cart Provider has local state of everything our cart needs to update values in our cart context. Everything we stored in our reducer we now store in the local state of the <CartContext.Provider>. We then wrap it around our entire App, then pass in the variables and functions we need in value={{...}}. Now the entire app has access to what's called a 'consumer' that allows us to use any value or function we need related to the cart.
+
+The Cart Context is a 'vehicle' that allows us to pass values and updates to and from the Cart 'Provider' which holds the local state of the values
+
+## lecture 238
+
+Setup removeItem and clearItemFromCart in cart.provider
+
+    const removeItem = item => setCartItems(removeItemFromCart(cartItems, item));
+
+removeItem is a function that takes in the item and calls the setCartItems useState hook, which in turn, calls the removeItemFromCart function that takes in all the cartItems, and the individual item, then returns a new array with the item removed and updates the cart state.
+
+Now we want to remove the removeItem Redux code since we do it with Context now. we go to the checkout-item.component and we no longer need to pass in removeItem and addItem through as props from redux. Import useContext and more specifically CartContext from our cart.provider. Inside of the CheckoutItem component We already have an _explicit_ return so we can destructure off our new addItem and removeItem from the useContext(CartContext) hook. So we no longer need to dispatch the add/removeItem from mapDispatch or import it from actions
+
+We are still getting our cart items from redux so lets change that here in checkout.component. Now we are getting cartItems from Context. Now cartDropdown is throwing error because it's trying to dispatch a toggleCartHidden action to Redux. Instead we'll pull in toggleHidden from context. (dont forget to pass it in the <CartContext.Provider> component).
+
+For clearItemsFromCart, we need to copy that logic from the cart.reducer and move it into out cart.provider
+
+Move the cart items count logic to cart.provider. We need to get the item count logic from our redux cart.selector to our cart.utils. bring it into the provider, then fire a useEffect whenever the cartItemsCount updates. It will call the useState hook setCartItemsCount and call our cart.util getCartItemsCount with the current cartItems. We need to pass in an array with [cartItems] so the useEffect runs whenever that variable is updated. Now bring in the cartItemsCount that we initiated in our cart.provider into the cart-icon.component
+
+    useEffect(() => {
+    setCartItemsCount(getCartItemsCount(cartItems))
+    }, [cartItems])

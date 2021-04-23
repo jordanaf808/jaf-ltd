@@ -19,10 +19,10 @@ export const addItemToCart = (cartItems, cartItemToAdd) => {
 export const removeItemFromCart = (cartItems, cartItemToRemove) => {
   const existingCartItem = cartItems.find(
     cartItem => cartItem.id === cartItemToRemove.id
-  );
+  ); // if only 1 cart item left, remove item completely from list.
   if (existingCartItem.quantity === 1) {
     return cartItems.filter(cartItem => cartItem.id !== cartItemToRemove.id);
-  }
+  } // if there are multiple items, only remove 1 of those item. or do nothing.
   return cartItems.map(cartItem =>
     cartItem.id === cartItemToRemove.id
       ? { ...cartItem, quantity: cartItem.quantity - 1 }
