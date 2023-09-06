@@ -25,7 +25,9 @@ export const fetchCollectionsFailure = errorMessage => ({
 });
 
 // We refactored this thunk into a Saga.
-// This is a thunk where we took the logic of fetching our collections out of our shop component and here in our shop.actions. This thunk allows us to make multiple action dispatches to our shop reducer to retrieve collections and update the state within this one asynchronous function.
+// This is a thunk where we took the logic of fetching our collections out of our shop component 
+// and here in our shop.actions. This thunk allows us to make multiple action dispatches to our 
+// shop reducer to retrieve collections and update the state within this one asynchronous function.
 export const fetchCollectionsStartAsync = () => {
   return dispatch => {
     const collectionRef = firestore.collection('collections');
