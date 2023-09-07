@@ -18,7 +18,7 @@ import 'firebase/firestore';
 import 'firebase/auth';
 
 const config = {
-  apiKey: process.env.FIREBASE_KEY,
+  apiKey: process.env.REACT_APP_FIREBASE_KEY,
   authDomain: 'e-commerce-e56a3.firebaseapp.com',
   databaseURL: 'https://e-commerce-e56a3.firebaseio.com',
   projectId: 'e-commerce-e56a3',
