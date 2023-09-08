@@ -29,7 +29,7 @@
 .env.test.local
 .env.production.local
 /client/.DS_Store
-client/.eslintcache
+/client/.eslintcache
 /client/.env.local
 /client/.env.development.local
 /client/.env.test.local
